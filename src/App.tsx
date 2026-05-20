@@ -39,7 +39,7 @@ import type {
   SnapshotPreviewNode,
   SnapshotResponse,
   StateResponse,
-} from './types'
+} from './api-spec'
 
 type SnapshotTreeNode = {
   id: string

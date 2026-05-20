@@ -49,16 +49,25 @@ export type ActionRequest = {
   source?: string
 }
 
-export type ActionResponse = {
-  accepted: boolean
-  ok?: boolean
+export type ActionSuccessResponse = {
+  accepted: true
   message: string
   action?: string
   targetId?: string
+  durationMs?: number
+}
+
+export type ActionErrorResponse = {
+  accepted: false
+  message: string
   errorType?: string
   timedOut?: boolean
   durationMs?: number
 }
+
+export type ActionResponse =
+  | ActionSuccessResponse
+  | ActionErrorResponse
 
 export type ActionCatalogResponse = {
   summary: {
@@ -67,92 +76,95 @@ export type ActionCatalogResponse = {
   }
   items: Array<{
     targetId: string
-    targetType?: string
-    screen?: string
+    targetType: string
+    screen: string
     actions: Array<{
       name: string
       args: string[]
-      summary?: string
+      summary: string
       example: ActionRequest
     }>
   }>
 }
 
+export type LogEntry = {
+  seq: number
+  time: string
+  source: string
+  level: string
+  event: string
+  targetId?: string
+  summary: string
+  data: Record<string, string>
+}
+
 export type LogsResponse = {
   summary?: {
-    total?: number
+    total: number
     timeRange?: {
-      from?: string
-      to?: string
+      from: string
+      to: string
     }
-    levelCounts?: Record<string, number>
-    sourceCounts?: Record<string, number>
-    eventCountsTop?: Record<string, number>
+    levelCounts: Record<string, number>
+    sourceCounts: Record<string, number>
+    eventCountsTop: Record<string, number>
   }
-  items?: Array<{
-    seq: number
-    time: string
-    source: string
-    level: string
-    event: string
-    targetId?: string
-    summary?: string
-    data: Record<string, string>
-  }>
+  items?: LogEntry[]
   nextAfterSeq?: number
 }
 
 export type LogsClearResponse = {
-  accepted: boolean
+  accepted: true
   message: string
   clearedCount: number
-  ok?: boolean
-  deletedCount?: number
 }
 
 export type StateResponse = {
   summary?: {
-    appStateKeys?: Array<{
-      key: string
-      sample: string
-    }>
-    targetStateTargets?: string[]
+    appStateKeys: Array<{ key: string; sample: string }>
+    targetStateTargets: string[]
   }
   appState?: Record<string, string>
   targetState?: Record<string, string>
 }
 
+export type SnapshotNode = {
+  id: string
+  parentId?: string
+  type?: string
+  text?: string
+  role?: string
+  backgroundColor?: string
+  contentColor?: string
+  visible?: boolean
+  enabled?: boolean
+  clickable?: boolean
+  value?: string
+  extra?: Record<string, string>
+  bounds?: {
+    left: number
+    top: number
+    width: number
+    height: number
+  }
+}
+
+export type SnapshotPreviewNode = SnapshotNode & {
+  bounds: NonNullable<SnapshotNode['bounds']>
+}
+
 export type SnapshotResponse = {
   summary?: {
-    screen?: string
-    nodeCount?: number
-    rootIds?: string[]
-    typeCounts?: Record<string, number>
-    clickableCount?: number
+    screen: string
+    nodeCount: number
+    rootIds: string[]
+    typeCounts: Record<string, number>
+    clickableCount: number
   }
   fieldCatalog?: string[]
   examples?: string[]
   screen?: string
-  nodes?: Array<{
-    id: string
-    parentId?: string
-    type?: string
-    text?: string
-    role?: string
-    backgroundColor?: string
-    contentColor?: string
-    visible?: boolean
-    enabled?: boolean
-    clickable?: boolean
-    value?: string
-    extra?: Record<string, string>
-    bounds?: {
-      left?: number
-      top?: number
-      width?: number
-      height?: number
-    }
-  }>
+  nodes?: SnapshotNode[]
 }
 
 export type MetaRoute = RouteDef<
@@ -197,9 +209,9 @@ export type ActionPostRoute = RouteDef<
     }
   },
   {
-    200: ActionResponse
-    400: ActionResponse
-    500: ActionResponse
+    200: ActionSuccessResponse
+    400: ActionErrorResponse
+    500: ActionErrorResponse
   }
 >
 

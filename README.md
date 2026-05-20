@@ -30,8 +30,7 @@ pnpm build
 
 统一接口文档：
 
-- [debug-bridge.openapi.ts](./debug-bridge.openapi.ts)
-- [debug-bridge.openapi.yaml](./debug-bridge.openapi.yaml)
+- [src/api-spec.ts](./src/api-spec.ts)
 
 要求：
 
