@@ -1,5 +1,5 @@
-import type { CSSProperties, FC, ReactNode } from 'react'
-import { cloneElement, isValidElement, useEffect, useRef, useState } from 'react'
+import type { FC, ReactNode } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   App as AntdApp,
   Button,
@@ -68,71 +68,17 @@ type ManualActionFormValues = {
 const { Header, Content } = Layout
 const { Title, Text } = Typography
 const apiBaseURLStorageKey = 'freewind-debug-bridge-web/api-base-url'
+const compactInputStyle = { width: '100%' } as const
+const compactNumberStyle = { width: '100%' } as const
+const compactSelectStyle = { width: '100%' } as const
 const commonSelectProps = {
   popupMatchSelectWidth: false,
   optionFilterProp: 'label' as const,
   showSearch: true,
   size: 'small' as const,
+  style: compactSelectStyle,
 }
 const snapshotPreviewFallbackWidth = 520
-const queryFieldWidth = 220
-const queryFieldNumberWidth = 120
-const queryFieldWideWidth = 300
-const snapshotPreviewShellStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: 8,
-} satisfies CSSProperties
-const snapshotPreviewBarStyle = {
-  display: 'flex',
-  justifyContent: 'space-between',
-} satisfies CSSProperties
-const snapshotPreviewCanvasStyle = {
-  position: 'relative',
-  width: '100%',
-  overflow: 'hidden',
-  border: '1px solid #d9d9d9',
-  borderRadius: 8,
-  background: '#fafafa',
-} satisfies CSSProperties
-const snapshotPreviewNodeBaseStyle = {
-  position: 'absolute',
-  overflow: 'hidden',
-  border: '1px solid #bfbfbf',
-  borderRadius: 6,
-  padding: '2px 4px',
-  background: 'rgba(255, 255, 255, 0.92)',
-  color: '#262626',
-  lineHeight: 1.2,
-  boxSizing: 'border-box',
-} satisfies CSSProperties
-const snapshotPreviewNodeClickableStyle = {
-  borderColor: '#1677ff',
-  background: 'rgba(230, 244, 255, 0.92)',
-} satisfies CSSProperties
-const snapshotPreviewNodeContainerStyle = {
-  borderStyle: 'dashed',
-  borderColor: '#d9d9d9',
-  background: 'rgba(250, 250, 250, 0.28)',
-} satisfies CSSProperties
-const snapshotPreviewNodeTextStyle = {
-  border: 'none',
-  borderRadius: 0,
-  padding: 0,
-  background: 'transparent',
-} satisfies CSSProperties
-const snapshotPreviewNodeLabelStyle = {
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textOverflow: 'ellipsis',
-  fontWeight: 500,
-} satisfies CSSProperties
-const snapshotPreviewNodeMetaStyle = {
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textOverflow: 'ellipsis',
-  color: '#8c8c8c',
-} satisfies CSSProperties
 const snapshotPreviewFields = [
   'id',
   'parentId',
@@ -162,13 +108,6 @@ const snapshotScopeOptions = [
 
 function buildActionKey(targetId: string, action: string) {
   return `${targetId}::${action}`
-}
-
-function toResponsiveWidth(width?: number | string) {
-  if (typeof width === 'number') {
-    return `min(100%, ${width}px)`
-  }
-  return width
 }
 
 function normalizeAPIBaseURL(value?: string) {
@@ -226,32 +165,22 @@ const JsonInfoButton: FC<{
 const LabeledField: FC<{
   name: FormItemProps['name']
   label: string
-  width?: number | string
+  className?: string
   rules?: FormItemProps['rules']
   children: ReactNode
 }> = ({
   name,
   label,
-  width,
+  className,
   rules,
   children,
 }) => {
-  const controlWidth = toResponsiveWidth(width)
-  const control = controlWidth && isValidElement<{ style?: CSSProperties }>(children)
-    ? cloneElement(children, {
-      style: {
-        ...children.props.style,
-        width: controlWidth,
-      },
-    })
-    : children
-
   return (
-    <div style={{ maxWidth: '100%' }}>
+    <div className={className}>
       <Form.Item style={{ marginBottom: 0 }}>
         <FloatLabel label={label} size="small">
           <Form.Item name={name} noStyle rules={rules}>
-            {control}
+            {children}
           </Form.Item>
         </FloatLabel>
       </Form.Item>
@@ -373,13 +302,13 @@ const SnapshotPreview: FC<{ snapshot: SnapshotResponse | null }> = ({ snapshot }
   const canvasHeight = Math.max(220, Math.ceil(height * scale))
 
   return (
-    <div ref={shellRef} style={snapshotPreviewShellStyle}>
-      <div style={snapshotPreviewBarStyle}>
+    <div ref={shellRef} className="snapshot-preview-shell">
+      <div className="snapshot-preview-bar">
         <Text type="secondary">
           {(snapshot?.screen || snapshot?.summary?.screen || 'Unknown')} · {nodes.length} nodes
         </Text>
       </div>
-      <div style={{ ...snapshotPreviewCanvasStyle, height: canvasHeight }}>
+      <div className="snapshot-preview-canvas" style={{ height: canvasHeight }}>
         {nodes.map((node) => {
           const label = node.text || node.value || node.id
           const typeLabel = node.type || node.role || 'Node'
@@ -394,11 +323,13 @@ const SnapshotPreview: FC<{ snapshot: SnapshotResponse | null }> = ({ snapshot }
           return (
             <div
               key={node.id}
+              className={[
+                'snapshot-preview-node',
+                node.clickable ? 'snapshot-preview-node--clickable' : '',
+                isContainer ? 'snapshot-preview-node--container' : '',
+                isTextLike ? 'snapshot-preview-node--text' : '',
+              ].filter(Boolean).join(' ')}
               style={{
-                ...snapshotPreviewNodeBaseStyle,
-                ...(node.clickable ? snapshotPreviewNodeClickableStyle : {}),
-                ...(isContainer ? snapshotPreviewNodeContainerStyle : {}),
-                ...(isTextLike ? snapshotPreviewNodeTextStyle : {}),
                 left: (node.bounds.left - minLeft) * scale,
                 top: (node.bounds.top - minTop) * scale,
                 width: Math.max(scaledWidth, 12),
@@ -409,8 +340,8 @@ const SnapshotPreview: FC<{ snapshot: SnapshotResponse | null }> = ({ snapshot }
             >
               {showLabel ? (
                 <>
-                  {!isContainer ? <div style={snapshotPreviewNodeLabelStyle}>{label}</div> : null}
-                  {!isTextLike && !isContainer ? <div style={snapshotPreviewNodeMetaStyle}>{typeLabel}</div> : null}
+                  {!isContainer ? <div className="snapshot-preview-node-label">{label}</div> : null}
+                  {!isTextLike && !isContainer ? <div className="snapshot-preview-node-meta">{typeLabel}</div> : null}
                 </>
               ) : null}
             </div>
@@ -444,15 +375,15 @@ const SnapshotTreeView: FC<{ snapshot: SnapshotResponse | null }> = ({ snapshot 
   }
 
   return (
-    <Tree
-      blockNode
-      defaultExpandAll
-      height={420}
-      selectable={false}
-      showLine
-      style={{ minWidth: 'max-content' }}
-      treeData={treeData.map(toAntdTreeNode)}
-    />
+    <div className="snapshot-tree-shell">
+      <Tree
+        blockNode
+        defaultExpandAll
+        selectable={false}
+        showLine
+        treeData={treeData.map(toAntdTreeNode)}
+      />
+    </div>
   )
 }
 
@@ -853,33 +784,25 @@ const App: FC = () => {
 
   return (
     <Layout>
-      <Header
-        style={{
-          background: '#fff',
-          borderBottom: '1px solid #f0f0f0',
-          padding: '8px 16px',
-          height: 'auto',
-          lineHeight: 1.2,
-        }}
-      >
+      <Header className="page-header">
         <Flex justify="space-between" align="center" gap={12} wrap>
           <Space direction="vertical" size={2}>
             <Title level={4} style={{ margin: 0, lineHeight: '32px', paddingTop: 6 }}>
               {consoleTitle}
             </Title>
             <Space size={8} wrap>
-              <Text strong style={{ fontSize: 16 }}>{headerAppName}</Text>
-              {headerBuildVersion !== undefined ? <Tag color="blue" style={{ fontWeight: 600 }}>{`v${headerBuildVersion}`}</Tag> : null}
+              <Text strong className="header-app-name">{headerAppName}</Text>
+              {headerBuildVersion !== undefined ? <Tag color="blue" className="header-build-version">{`v${headerBuildVersion}`}</Tag> : null}
               <Text type="secondary">{headerStatus}</Text>
             </Space>
           </Space>
-          <Space size={8} wrap style={{ width: 'min(100%, 520px)', justifyContent: 'flex-end' }}>
+          <Space size={8} wrap className="api-base-url-bar">
             <Text type="secondary">{`API ${apiBaseURLLabel}`}</Text>
             <Input
               size="small"
               value={apiBaseURLInput}
               placeholder="http://127.0.0.1:9001"
-              style={{ width: 'min(100%, 360px)' }}
+              className="api-base-url-input"
               onChange={(event) => setApiBaseURLInput(event.target.value)}
               onPressEnter={() => void applyAPIBaseURL()}
             />
@@ -889,7 +812,7 @@ const App: FC = () => {
           </Space>
         </Flex>
       </Header>
-      <Content style={{ padding: 12 }}>
+      <Content className="page">
         <Space direction="vertical" size={8} style={{ display: 'flex' }}>
           <Card size="small">
             <Space size={8} wrap>
@@ -904,10 +827,10 @@ const App: FC = () => {
           </Card>
 
           <Flex gap={8} wrap>
-            <Card size="small" style={{ flex: '1 1 160px', minWidth: 150 }}><Statistic title="Action Targets" value={help?.counts.actionTargetCount ?? 0} /></Card>
-            <Card size="small" style={{ flex: '1 1 160px', minWidth: 150 }}><Statistic title="Logs" value={help?.counts.logCount ?? 0} /></Card>
-            <Card size="small" style={{ flex: '1 1 160px', minWidth: 150 }}><Statistic title="State Keys" value={help?.counts.stateKeyCount ?? 0} /></Card>
-            <Card size="small" style={{ flex: '1 1 160px', minWidth: 150 }}><Statistic title="Snapshot Nodes" value={help?.counts.snapshotNodeCount ?? 0} /></Card>
+            <Card size="small" className="stat-card"><Statistic title="Action Targets" value={help?.counts.actionTargetCount ?? 0} /></Card>
+            <Card size="small" className="stat-card"><Statistic title="Logs" value={help?.counts.logCount ?? 0} /></Card>
+            <Card size="small" className="stat-card"><Statistic title="State Keys" value={help?.counts.stateKeyCount ?? 0} /></Card>
+            <Card size="small" className="stat-card"><Statistic title="Snapshot Nodes" value={help?.counts.snapshotNodeCount ?? 0} /></Card>
           </Flex>
 
           <Tabs
@@ -922,15 +845,15 @@ const App: FC = () => {
                       <Form form={logsForm} layout="vertical" size="small">
                         <Flex vertical gap="small">
                           <Flex gap="small" wrap>
-                            <LabeledField name="event" label="event" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={logEventOptions} /></LabeledField>
-                            <LabeledField name="level" label="level" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={logLevelOptions} /></LabeledField>
-                            <LabeledField name="source" label="source" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={logSourceOptions} /></LabeledField>
-                            <LabeledField name="targetId" label="targetId" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={logTargetIdOptions} /></LabeledField>
-                            <LabeledField name="screen" label="screen" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={screenOptions} /></LabeledField>
-                            <LabeledField name="from" label="from" width={queryFieldWidth}><Input size="small" /></LabeledField>
-                            <LabeledField name="to" label="to" width={queryFieldWidth}><Input size="small" /></LabeledField>
-                            <LabeledField name="limit" label="limit" width={queryFieldNumberWidth}><InputNumber size="small" /></LabeledField>
-                            <LabeledField name="keyword" label="keyword" width={queryFieldWidth}><Input size="small" /></LabeledField>
+                            <LabeledField name="event" label="event" className="query-cell"><Select {...commonSelectProps} allowClear options={logEventOptions} /></LabeledField>
+                            <LabeledField name="level" label="level" className="query-cell"><Select {...commonSelectProps} allowClear options={logLevelOptions} /></LabeledField>
+                            <LabeledField name="source" label="source" className="query-cell"><Select {...commonSelectProps} allowClear options={logSourceOptions} /></LabeledField>
+                            <LabeledField name="targetId" label="targetId" className="query-cell"><Select {...commonSelectProps} allowClear options={logTargetIdOptions} /></LabeledField>
+                            <LabeledField name="screen" label="screen" className="query-cell"><Select {...commonSelectProps} allowClear options={screenOptions} /></LabeledField>
+                            <LabeledField name="from" label="from" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
+                            <LabeledField name="to" label="to" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
+                            <LabeledField name="limit" label="limit" className="query-cell query-cell--number"><InputNumber size="small" style={compactNumberStyle} /></LabeledField>
+                            <LabeledField name="keyword" label="keyword" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
                           </Flex>
                           <Space size={8} wrap>
                             <Button size="small" type="primary" onClick={() => void loadLogs()}>Query Logs</Button>
@@ -967,9 +890,9 @@ const App: FC = () => {
                       <Form form={actionQueryForm} layout="vertical" size="small">
                         <Flex vertical gap="small">
                           <Flex gap="small" wrap>
-                            <LabeledField name="targetId" label="targetId" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={actionTargetIdOptions} /></LabeledField>
-                            <LabeledField name="action" label="action" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={actionQueryActionOptions} /></LabeledField>
-                            <LabeledField name="screen" label="screen" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={screenOptions} /></LabeledField>
+                            <LabeledField name="targetId" label="targetId" className="query-cell"><Select {...commonSelectProps} allowClear options={actionTargetIdOptions} /></LabeledField>
+                            <LabeledField name="action" label="action" className="query-cell"><Select {...commonSelectProps} allowClear options={actionQueryActionOptions} /></LabeledField>
+                            <LabeledField name="screen" label="screen" className="query-cell"><Select {...commonSelectProps} allowClear options={screenOptions} /></LabeledField>
                           </Flex>
                           <Button size="small" type="primary" onClick={() => void loadActions()}>Load Actions</Button>
                         </Flex>
@@ -1007,18 +930,18 @@ const App: FC = () => {
                             </Space>
                           ) : null}
                           <Flex gap="small" wrap>
-                            <LabeledField name="targetId" label="targetId" width={queryFieldWidth} rules={[{ required: true }]}><Select {...commonSelectProps} options={actionTargetIdOptions} onChange={(value) => manualActionForm.setFieldsValue({ targetId: value, action: undefined, text: undefined, dx: undefined, dy: undefined, argValues: {} })} /></LabeledField>
-                            <LabeledField name="action" label="action" width={queryFieldWidth} rules={[{ required: true }]}><Select {...commonSelectProps} options={manualActionOptions} onChange={(value) => value && manualActionTargetId ? hydrateManualAction(manualActionTargetId, value) : manualActionForm.setFieldValue('action', value)} /></LabeledField>
-                            <LabeledField name="source" label="source" width={queryFieldWidth}><Input size="small" /></LabeledField>
-                            <LabeledField name="text" label="text" width={queryFieldWidth}><Input size="small" /></LabeledField>
-                            <LabeledField name="dx" label="dx" width={queryFieldNumberWidth}><InputNumber size="small" /></LabeledField>
-                            <LabeledField name="dy" label="dy" width={queryFieldNumberWidth}><InputNumber size="small" /></LabeledField>
+                            <LabeledField name="targetId" label="targetId" className="query-cell" rules={[{ required: true }]}><Select {...commonSelectProps} options={actionTargetIdOptions} onChange={(value) => manualActionForm.setFieldsValue({ targetId: value, action: undefined, text: undefined, dx: undefined, dy: undefined, argValues: {} })} /></LabeledField>
+                            <LabeledField name="action" label="action" className="query-cell" rules={[{ required: true }]}><Select {...commonSelectProps} options={manualActionOptions} onChange={(value) => value && manualActionTargetId ? hydrateManualAction(manualActionTargetId, value) : manualActionForm.setFieldValue('action', value)} /></LabeledField>
+                            <LabeledField name="source" label="source" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
+                            <LabeledField name="text" label="text" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
+                            <LabeledField name="dx" label="dx" className="query-cell query-cell--number"><InputNumber size="small" style={compactNumberStyle} /></LabeledField>
+                            <LabeledField name="dy" label="dy" className="query-cell query-cell--number"><InputNumber size="small" style={compactNumberStyle} /></LabeledField>
                           </Flex>
                           {manualActionArgNames.length ? (
                             <Flex gap="small" wrap>
                               {manualActionArgNames.map((argName) => (
-                                <LabeledField key={argName} name={['argValues', argName]} label={argName} width={queryFieldWidth}>
-                                  <Input size="small" />
+                                <LabeledField key={argName} name={['argValues', argName]} label={argName} className="query-cell">
+                                  <Input size="small" style={compactInputStyle} />
                                 </LabeledField>
                               ))}
                             </Flex>
@@ -1045,9 +968,9 @@ const App: FC = () => {
                       <Form form={stateForm} layout="vertical" size="small">
                         <Flex vertical gap="small">
                           <Flex gap="small" wrap>
-                            <LabeledField name="keys" label="keys" width={queryFieldWideWidth}><Select {...commonSelectProps} mode="multiple" allowClear options={stateKeyOptions} /></LabeledField>
-                            <LabeledField name="targetId" label="targetId" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={stateTargetIdOptions} /></LabeledField>
-                            <LabeledField name="scope" label="scope" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={stateScopeOptions} /></LabeledField>
+                            <LabeledField name="keys" label="keys" className="query-cell query-cell--wide"><Select {...commonSelectProps} mode="multiple" allowClear options={stateKeyOptions} /></LabeledField>
+                            <LabeledField name="targetId" label="targetId" className="query-cell"><Select {...commonSelectProps} allowClear options={stateTargetIdOptions} /></LabeledField>
+                            <LabeledField name="scope" label="scope" className="query-cell"><Select {...commonSelectProps} allowClear options={stateScopeOptions} /></LabeledField>
                           </Flex>
                           <Space size={8}>
                             <Button size="small" type="primary" onClick={() => void loadState()}>Query State</Button>
@@ -1072,15 +995,15 @@ const App: FC = () => {
                       <Form form={snapshotForm} layout="vertical" size="small">
                         <Flex vertical gap="small">
                           <Flex gap="small" wrap>
-                            <LabeledField name="targetId" label="targetId" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={snapshotTargetIdOptions} /></LabeledField>
-                            <LabeledField name="scope" label="scope" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={snapshotScopeOptions} /></LabeledField>
-                            <LabeledField name="depth" label="depth" width={queryFieldNumberWidth}><InputNumber size="small" /></LabeledField>
-                            <LabeledField name="types" label="types" width={queryFieldWideWidth}><Select {...commonSelectProps} mode="multiple" allowClear options={snapshotTypeOptions} /></LabeledField>
-                            <LabeledField name="textKeyword" label="textKeyword" width={queryFieldWidth}><Input size="small" /></LabeledField>
-                            <LabeledField name="visible" label="visible" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
-                            <LabeledField name="enabled" label="enabled" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
-                            <LabeledField name="clickable" label="clickable" width={queryFieldWidth}><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
-                            <LabeledField name="limit" label="limit" width={queryFieldNumberWidth}><InputNumber size="small" /></LabeledField>
+                            <LabeledField name="targetId" label="targetId" className="query-cell"><Select {...commonSelectProps} allowClear options={snapshotTargetIdOptions} /></LabeledField>
+                            <LabeledField name="scope" label="scope" className="query-cell"><Select {...commonSelectProps} allowClear options={snapshotScopeOptions} /></LabeledField>
+                            <LabeledField name="depth" label="depth" className="query-cell query-cell--number"><InputNumber size="small" style={compactNumberStyle} /></LabeledField>
+                            <LabeledField name="types" label="types" className="query-cell query-cell--wide"><Select {...commonSelectProps} mode="multiple" allowClear options={snapshotTypeOptions} /></LabeledField>
+                            <LabeledField name="textKeyword" label="textKeyword" className="query-cell"><Input size="small" style={compactInputStyle} /></LabeledField>
+                            <LabeledField name="visible" label="visible" className="query-cell"><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
+                            <LabeledField name="enabled" label="enabled" className="query-cell"><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
+                            <LabeledField name="clickable" label="clickable" className="query-cell"><Select {...commonSelectProps} allowClear options={triStateOptions} /></LabeledField>
+                            <LabeledField name="limit" label="limit" className="query-cell query-cell--number"><InputNumber size="small" style={compactNumberStyle} /></LabeledField>
                           </Flex>
                           <Space size={8}>
                             <Button size="small" type="primary" onClick={() => void loadSnapshot()}>Query Snapshot</Button>
@@ -1095,7 +1018,7 @@ const App: FC = () => {
                         size="small"
                         title="Preview"
                         extra={<JsonInfoButton title="Snapshot JSON" value={snapshot} maxHeight={360} />}
-                        style={{ flex: '1 1 520px', minWidth: 320 }}
+                        className="snapshot-pane-card snapshot-pane-card--preview"
                       >
                         <SnapshotPreview snapshot={snapshot} />
                       </Card>
@@ -1103,7 +1026,7 @@ const App: FC = () => {
                       <Card
                         size="small"
                         title="Tree"
-                        style={{ flex: '1 1 420px', minWidth: 320 }}
+                        className="snapshot-pane-card snapshot-pane-card--tree"
                       >
                         <SnapshotTreeView snapshot={snapshot} />
                       </Card>
