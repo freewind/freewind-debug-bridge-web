@@ -30,7 +30,8 @@ pnpm build
 
 统一接口文档：
 
-- [openapi/debug-bridge.openapi.yaml](./openapi/debug-bridge.openapi.yaml)
+- [debug-bridge.openapi.ts](./debug-bridge.openapi.ts)
+- [debug-bridge.openapi.yaml](./debug-bridge.openapi.yaml)
 
 要求：
 
@@ -38,4 +39,3 @@ pnpm build
 - SwiftUI debug server
 
 都必须满足这份契约；若有额外字段，只能追加，不能破坏已有字段语义。
-
