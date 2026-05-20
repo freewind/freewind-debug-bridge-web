@@ -27,6 +27,14 @@ body {
   width: min(360px, calc(100vw - 120px));
 }
 
+.header-app-name {
+  font-size: 16px;
+}
+
+.header-build-version {
+  font-weight: 600;
+}
+
 .page {
   padding: 12px;
 }

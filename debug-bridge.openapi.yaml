@@ -11,6 +11,16 @@ servers:
       port:
         default: "8765"
 paths:
+  /meta:
+    get:
+      operationId: getMeta
+      responses:
+        "200":
+          description: App metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaResponse"
   /help:
     get:
       operationId: getHelp
@@ -204,6 +214,14 @@ components:
       schema:
         type: string
   schemas:
+    MetaResponse:
+      type: object
+      required: [appName, buildVersion]
+      properties:
+        appName:
+          type: string
+        buildVersion:
+          type: number
     HelpResponse:
       type: object
       required: [appName, screenName, serverTime, capabilities, counts, endpoints, examples]
@@ -504,4 +522,3 @@ components:
                     type: number
                   height:
                     type: number
-

@@ -35,6 +35,7 @@ import type {
   LogEntry,
   LogsClearResponse,
   LogsResponse,
+  MetaResponse,
   SnapshotPreviewNode,
   SnapshotResponse,
   StateResponse,
@@ -391,6 +392,7 @@ const App: FC = () => {
 
   const [apiBaseURL, setApiBaseURL] = useState(readInitialAPIBaseURL)
   const [apiBaseURLInput, setApiBaseURLInput] = useState(readInitialAPIBaseURL)
+  const [meta, setMeta] = useState<MetaResponse | null>(null)
   const [help, setHelp] = useState<HelpResponse | null>(null)
   const [actions, setActions] = useState<ActionCatalogResponse | null>(null)
   const [logs, setLogs] = useState<LogsResponse | null>(null)
@@ -480,10 +482,26 @@ const App: FC = () => {
   const snapshotTypeOptions = toOptions(
     (snapshot?.nodes || []).map((item) => item.type)
   )
-  const apiBaseURLLabel = apiBaseURL || 'same origin'
+  const apiBaseURLLabel = apiBaseURL || 'not set'
+  const headerAppName = meta?.appName || 'No API Connected'
+  const headerBuildVersion = meta?.buildVersion
+  const headerStatus = help ? `${help.screenName} / ${help.serverTime}` : (apiBaseURL ? 'connecting...' : 'fill API base URL')
 
   function requestJSON<T>(path: string, init?: RequestInit) {
+    if (!apiBaseURL) {
+      throw new Error('请先填写 API base URL')
+    }
     return fetchJSON<T>(path, { ...init, baseURL: apiBaseURL })
+  }
+
+  function clearRemoteData() {
+    setMeta(null)
+    setHelp(null)
+    setActions(null)
+    setLogs(null)
+    setStateData(null)
+    setSnapshot(null)
+    setActionResult(null)
   }
 
   const actionColumns: ColumnsType<ActionCatalogResponse['items'][number]> = [
@@ -565,6 +583,12 @@ const App: FC = () => {
     })
   }
 
+  async function loadMeta() {
+    const result = await requestJSON<MetaResponse>('/meta')
+    setMeta(result)
+    return result
+  }
+
   async function loadHelp() {
     const result = await requestJSON<HelpResponse>('/help')
     setHelp(result)
@@ -606,8 +630,13 @@ const App: FC = () => {
   }
 
   async function refreshAll() {
+    if (!apiBaseURL) {
+      clearRemoteData()
+      return
+    }
     try {
       await Promise.all([
+        loadMeta(),
         loadHelp(),
         loadActions({}),
         loadLogs({}),
@@ -631,6 +660,10 @@ const App: FC = () => {
       setApiBaseURL(normalizedValue)
       setApiBaseURLInput(normalizedValue)
       window.localStorage.setItem(apiBaseURLStorageKey, normalizedValue)
+      if (!normalizedValue) {
+        clearRemoteData()
+        return
+      }
       await refreshAllWithBaseURL(normalizedValue)
     } catch (error) {
       message.error(String((error as Error).message || error))
@@ -638,14 +671,20 @@ const App: FC = () => {
   }
 
   async function refreshAllWithBaseURL(baseURL: string) {
+    if (!baseURL) {
+      clearRemoteData()
+      return
+    }
     try {
       await Promise.all([
+        fetchJSON<MetaResponse>('/meta', { baseURL }),
         fetchJSON<HelpResponse>('/help', { baseURL }),
         fetchJSON<ActionCatalogResponse>('/action', { baseURL }),
         fetchJSON<LogsResponse>(`/logs${buildQuery({})}`, { baseURL }),
         fetchJSON<StateResponse>(`/state${buildQuery({})}`, { baseURL }),
         fetchJSON<SnapshotResponse>(`/snapshot${buildQuery(normalizeSnapshotQuery(snapshotForm.getFieldsValue()))}`, { baseURL }),
-      ]).then(([nextHelp, nextActions, nextLogs, nextStateData, nextSnapshot]) => {
+      ]).then(([nextMeta, nextHelp, nextActions, nextLogs, nextStateData, nextSnapshot]) => {
+        setMeta(nextMeta)
         setHelp(nextHelp)
         setActions(nextActions)
         setLogs(nextLogs)
@@ -714,12 +753,14 @@ const App: FC = () => {
     logsForm.setFieldsValue({ limit: 20 })
     stateForm.setFieldsValue({})
     snapshotForm.setFieldsValue({ limit: 200, types: [] })
-    void refreshAll()
+    if (readInitialAPIBaseURL()) {
+      void refreshAll()
+    }
   }, [])
 
   useEffect(() => {
-    document.title = consoleTitle
-  }, [consoleTitle])
+    document.title = meta?.appName ? `${meta.appName} Debug Console` : consoleTitle
+  }, [consoleTitle, meta?.appName])
 
   useEffect(() => {
     if (!actionQueryAction) {
@@ -745,13 +786,15 @@ const App: FC = () => {
     <Layout>
       <Header className="page-header">
         <Flex justify="space-between" align="center" gap={12} wrap>
-          <Space direction="vertical" size={0}>
+          <Space direction="vertical" size={2}>
             <Title level={4} style={{ margin: 0, lineHeight: '32px', paddingTop: 6 }}>
               {consoleTitle}
             </Title>
-            <Text type="secondary">
-              {help ? `${help.appName} / ${help.screenName} / ${help.serverTime}` : 'loading...'}
-            </Text>
+            <Space size={8} wrap>
+              <Text strong className="header-app-name">{headerAppName}</Text>
+              {headerBuildVersion !== undefined ? <Tag color="blue" className="header-build-version">{`v${headerBuildVersion}`}</Tag> : null}
+              <Text type="secondary">{headerStatus}</Text>
+            </Space>
           </Space>
           <Space size={8} wrap className="api-base-url-bar">
             <Text type="secondary">{`API ${apiBaseURLLabel}`}</Text>

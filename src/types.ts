@@ -1,3 +1,8 @@
+export type MetaResponse = {
+  appName: string
+  buildVersion: number
+}
+
 export type HelpResponse = {
   appName: string
   consoleTitle?: string
