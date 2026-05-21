@@ -1,24 +1,14 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table } from 'antd'
-import type { FormInstance } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { JsonPreviewer } from 'freewind-ts-utils'
+import type { FC } from 'react'
 import type { LogEntry, LogsResponse } from '../../../api-spec'
 import { commonSelectProps } from '../../constants'
 import { JsonInfoButton, LabeledField } from '../../../components'
+import { toOptions } from '../../../utils/toOptions'
+import { useAppStore } from '../../store'
 
 type Option = { label: string; value: string }
-
-type Props = {
-  clearLogs: () => Promise<unknown>
-  loadLogs: (values?: Record<string, unknown>) => Promise<LogsResponse | null>
-  logEventOptions: Option[]
-  logLevelOptions: Option[]
-  logSourceOptions: Option[]
-  logTargetIdOptions: Option[]
-  logs: LogsResponse | null
-  logsForm: FormInstance
-  screenOptions: Option[]
-}
 
 const logColumns: ColumnsType<LogEntry> = [
   { title: 'seq', dataIndex: 'seq', width: 80 },
@@ -41,17 +31,38 @@ const logColumns: ColumnsType<LogEntry> = [
   },
 ]
 
-export function LogsTab({
-  clearLogs,
-  loadLogs,
-  logEventOptions,
-  logLevelOptions,
-  logSourceOptions,
-  logTargetIdOptions,
-  logs,
-  logsForm,
-  screenOptions,
-}: Props) {
+export const LogsTab: FC = () => {
+  const actions = useAppStore((store) => store.actions)
+  const clearLogs = useAppStore((store) => store.clearLogs)
+  const help = useAppStore((store) => store.help)
+  const loadLogs = useAppStore((store) => store.loadLogs)
+  const logs = useAppStore((store) => store.logs)
+  const logsForm = useAppStore((store) => store.logsForm)
+  const snapshot = useAppStore((store) => store.snapshot)
+  const screenOptions: Option[] = toOptions([
+    help?.screenName,
+    snapshot?.screen,
+    snapshot?.summary?.screen,
+    ...(actions?.items || []).map((item: LogsResponse extends never ? never : { screen: string }) => item.screen),
+    ...(logs?.items || []).map((item: LogEntry) => item.data?.screen),
+  ])
+  const logEventOptions = toOptions([
+    ...Object.keys(logs?.summary?.eventCountsTop || {}),
+    ...(logs?.items || []).map((item: LogEntry) => item.event),
+  ])
+  const logLevelOptions = toOptions([
+    ...Object.keys(logs?.summary?.levelCounts || {}),
+    ...(logs?.items || []).map((item: LogEntry) => item.level),
+  ])
+  const logSourceOptions = toOptions([
+    ...Object.keys(logs?.summary?.sourceCounts || {}),
+    ...(logs?.items || []).map((item: LogEntry) => item.source),
+  ])
+  const logTargetIdOptions = toOptions([
+    ...(logs?.items || []).map((item: LogEntry) => item.targetId),
+    ...(actions?.items || []).map((item: { targetId: string }) => item.targetId),
+  ])
+
   return (
     <Space direction="vertical" size={8} style={{ display: 'flex' }}>
       <Card size="small" title="Query">

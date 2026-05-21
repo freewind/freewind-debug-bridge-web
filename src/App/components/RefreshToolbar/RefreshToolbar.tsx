@@ -1,13 +1,12 @@
+import type { FC } from 'react'
 import { Button, Card, Space } from 'antd'
-import type { LogsClearResponse } from '../../../api-spec'
+import { useAppStore } from '../../store'
 
-type Props = {
-  clearLogs: () => Promise<LogsClearResponse | null>
-  loadActions: (values?: Record<string, unknown>) => Promise<unknown>
-  refreshAll: () => Promise<unknown>
-}
+export const RefreshToolbar: FC = () => {
+  const clearLogs = useAppStore((store) => store.clearLogs)
+  const loadActions = useAppStore((store) => store.loadActions)
+  const refreshAll = useAppStore((store) => store.refreshAll)
 
-export function RefreshToolbar({ clearLogs, loadActions, refreshAll }: Props) {
   return (
     <Card size="small">
       <Space size={8} wrap>

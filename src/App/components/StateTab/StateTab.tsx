@@ -1,27 +1,27 @@
 import { Button, Card, Flex, Form, Select, Space } from 'antd'
-import type { FormInstance } from 'antd'
 import { JsonPreviewer } from 'freewind-ts-utils'
+import type { FC } from 'react'
 import { LabeledField } from '../../../components'
-import type { StateResponse } from '../../../api-spec'
+import type { ActionCatalogResponse } from '../../../api-spec'
+import { toOptions } from '../../../utils/toOptions'
 import { commonSelectProps, stateScopeOptions } from '../../constants'
+import { useAppStore } from '../../store'
 
 type Option = { label: string; value: string }
 
-type Props = {
-  loadState: (values?: Record<string, unknown>) => Promise<StateResponse | null>
-  stateData: StateResponse | null
-  stateForm: FormInstance
-  stateKeyOptions: Option[]
-  stateTargetIdOptions: Option[]
-}
+export const StateTab: FC = () => {
+  const actions = useAppStore((store) => store.actions)
+  const loadState = useAppStore((store) => store.loadState)
+  const stateData = useAppStore((store) => store.stateData)
+  const stateForm = useAppStore((store) => store.stateForm)
+  const stateKeyOptions: Option[] = toOptions(
+    (stateData?.summary?.appStateKeys || []).map((item: { key: string }) => item.key),
+  )
+  const stateTargetIdOptions: Option[] = toOptions([
+    ...(stateData?.summary?.targetStateTargets || []),
+    ...(actions?.items || []).map((item: ActionCatalogResponse['items'][number]) => item.targetId),
+  ])
 
-export function StateTab({
-  loadState,
-  stateData,
-  stateForm,
-  stateKeyOptions,
-  stateTargetIdOptions,
-}: Props) {
   return (
     <Space direction="vertical" size={8} style={{ display: 'flex' }}>
       <Card size="small" title="Query">

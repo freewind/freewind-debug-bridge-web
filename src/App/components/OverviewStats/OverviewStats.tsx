@@ -1,11 +1,10 @@
+import type { FC } from 'react'
 import { Card, Flex, Statistic } from 'antd'
-import type { HelpResponse } from '../../../api-spec'
+import { useAppStore } from '../../store'
 
-type Props = {
-  help: HelpResponse | null
-}
+export const OverviewStats: FC = () => {
+  const help = useAppStore((store) => store.help)
 
-export function OverviewStats({ help }: Props) {
   return (
     <Flex gap={8} wrap>
       <Card size="small" style={{ flex: '1 1 160px', minWidth: 150 }}>

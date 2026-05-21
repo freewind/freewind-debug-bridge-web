@@ -1,12 +1,11 @@
+import type { FC } from 'react'
 import { Card, Space } from 'antd'
 import { JsonPreviewer } from 'freewind-ts-utils'
-import type { HelpResponse } from '../../../api-spec'
+import { useAppStore } from '../../store'
 
-type Props = {
-  help: HelpResponse | null
-}
+export const HelpTab: FC = () => {
+  const help = useAppStore((store) => store.help)
 
-export function HelpTab({ help }: Props) {
   return (
     <Space direction="vertical" size={8} style={{ display: 'flex' }}>
       <Card size="small" title="JSON">

@@ -1,29 +1,28 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space } from 'antd'
-import type { FormInstance } from 'antd'
+import type { FC } from 'react'
 import { JsonInfoButton, LabeledField, SnapshotPreview, SnapshotTreeView } from '../../../components'
-import type { SnapshotResponse } from '../../../api-spec'
-import { snapshotScopeOptions, stateScopeOptions, triStateOptions } from '../../constants'
+import type { ActionCatalogResponse, SnapshotNode } from '../../../api-spec'
+import { toOptions } from '../../../utils/toOptions'
+import { snapshotScopeOptions, triStateOptions } from '../../constants'
 import { commonSelectProps } from '../../constants'
+import { useAppStore } from '../../store'
 
 type Option = { label: string; value: string }
 
-type Props = {
-  loadSnapshot: (values?: Record<string, unknown>) => Promise<SnapshotResponse | null>
-  loadSnapshotSummary: () => Promise<SnapshotResponse | null>
-  snapshot: SnapshotResponse | null
-  snapshotForm: FormInstance
-  snapshotTargetIdOptions: Option[]
-  snapshotTypeOptions: Option[]
-}
+export const SnapshotTab: FC = () => {
+  const actions = useAppStore((store) => store.actions)
+  const loadSnapshot = useAppStore((store) => store.loadSnapshot)
+  const loadSnapshotSummary = useAppStore((store) => store.loadSnapshotSummary)
+  const snapshot = useAppStore((store) => store.snapshot)
+  const snapshotForm = useAppStore((store) => store.snapshotForm)
+  const snapshotTargetIdOptions: Option[] = toOptions([
+    ...(snapshot?.nodes || []).map((item: SnapshotNode) => item.id),
+    ...(actions?.items || []).map((item: ActionCatalogResponse['items'][number]) => item.targetId),
+  ])
+  const snapshotTypeOptions: Option[] = toOptions(
+    (snapshot?.nodes || []).map((item: SnapshotNode) => item.type),
+  )
 
-export function SnapshotTab({
-  loadSnapshot,
-  loadSnapshotSummary,
-  snapshot,
-  snapshotForm,
-  snapshotTargetIdOptions,
-  snapshotTypeOptions,
-}: Props) {
   return (
     <Space direction="vertical" size={8} style={{ display: 'flex' }}>
       <Card size="small" title="Query">

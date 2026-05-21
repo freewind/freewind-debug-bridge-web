@@ -1,26 +1,23 @@
+import type { FC } from 'react'
 import { Button, Input, Layout, Space, Tag, Typography } from 'antd'
+import { useAppStore } from '../../store'
 
-type Props = {
-  apiBaseURLInput: string
-  apiBaseURLLabel: string
-  applyAPIBaseURL: (nextValue?: string) => Promise<unknown>
-  consoleTitle: string
-  headerAppName: string
-  headerBuildVersion?: number
-  headerStatus: string
-  setApiBaseURLInput: (value: string) => void
-}
+export const APIHeader: FC = () => {
+  const apiBaseURL = useAppStore((store) => store.apiBaseURL)
+  const apiBaseURLInput = useAppStore((store) => store.apiBaseURLInput)
+  const applyAPIBaseURL = useAppStore((store) => store.applyAPIBaseURL)
+  const consoleTitle = useAppStore((store) => store.help?.consoleTitle || 'Freewind Debug Console')
+  const headerAppName = useAppStore((store) => store.meta?.appName || 'No API Connected')
+  const headerBuildVersion = useAppStore((store) => store.meta?.buildVersion)
+  const help = useAppStore((store) => store.help)
+  const setApiBaseURLInput = useAppStore((store) => store.setApiBaseURLInput)
+  const apiBaseURLLabel = apiBaseURL || 'not set'
+  const headerStatus = help
+    ? `${help.screenName} / ${help.serverTime}`
+    : apiBaseURL
+      ? 'connecting...'
+      : 'fill API base URL'
 
-export function APIHeader({
-  apiBaseURLInput,
-  apiBaseURLLabel,
-  applyAPIBaseURL,
-  consoleTitle,
-  headerAppName,
-  headerBuildVersion,
-  headerStatus,
-  setApiBaseURLInput,
-}: Props) {
   return (
     <Layout.Header
       style={{

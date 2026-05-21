@@ -1,49 +1,77 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table, Tag, Typography } from 'antd'
-import type { FormInstance } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { JsonPreviewer } from 'freewind-ts-utils'
+import type { FC } from 'react'
 import { JsonInfoButton, LabeledField } from '../../../components'
-import type { ActionCatalogResponse, ActionRequest, ActionResponse, LogsClearResponse } from '../../../api-spec'
+import type { ActionCatalogResponse } from '../../../api-spec'
+import { buildActionKey } from '../../../utils/buildActionKey'
+import { toOptions } from '../../../utils/toOptions'
 import { commonSelectProps } from '../../constants'
 import type { ActionDescriptorView } from '../../types'
+import { useAppStore } from '../../store'
 
 type Option = { label: string; value: string }
 
-type Props = {
-  actionQueryActionOptions: Option[]
-  actionQueryForm: FormInstance
-  actionResult: ActionResponse | LogsClearResponse | null
-  actionTargetIdOptions: Option[]
-  actions: ActionCatalogResponse | null
-  fillManualAction: (targetId: string, action: string) => void
-  loadActions: (values?: Record<string, unknown>) => Promise<ActionCatalogResponse | null>
-  manualActionArgNames: string[]
-  manualActionForm: FormInstance
-  manualActionOptions: Option[]
-  manualActionTargetId?: string
-  runAction: (payload: ActionRequest) => Promise<ActionResponse | null>
-  runManualAction: () => Promise<ActionResponse | null>
-  screenOptions: Option[]
-  selectedManualActionDescriptor?: ActionDescriptorView
-}
+export const ActionTab: FC = () => {
+  const actionQueryForm = useAppStore((store) => store.actionQueryForm)
+  const actionQueryTargetId = useAppStore((store) => store.actionQueryTargetId)
+  const actionResult = useAppStore((store) => store.actionResult)
+  const actions = useAppStore((store) => store.actions)
+  const fillManualAction = useAppStore((store) => store.fillManualAction)
+  const loadActions = useAppStore((store) => store.loadActions)
+  const manualActionAction = useAppStore((store) => store.manualActionAction)
+  const manualActionForm = useAppStore((store) => store.manualActionForm)
+  const manualActionTargetId = useAppStore((store) => store.manualActionTargetId)
+  const runAction = useAppStore((store) => store.runAction)
+  const runManualAction = useAppStore((store) => store.runManualAction)
+  const stateData = useAppStore((store) => store.stateData)
+  const help = useAppStore((store) => store.help)
+  const logs = useAppStore((store) => store.logs)
+  const snapshot = useAppStore((store) => store.snapshot)
+  const actionTargetIdOptions = toOptions([
+    ...(actions?.items || []).map((item: ActionCatalogResponse['items'][number]) => item.targetId),
+    ...(stateData?.summary?.targetStateTargets || []),
+  ])
+  const actionDescriptors: ActionDescriptorView[] = (actions?.items || []).flatMap((item) => {
+    return item.actions.map((action) => ({
+      ...action,
+      targetId: item.targetId,
+      targetType: item.targetType,
+      screen: item.screen,
+    }))
+  })
+  const actionDescriptorByKey = actionDescriptors.reduce<Record<string, ActionDescriptorView>>((result, item) => {
+    result[buildActionKey(item.targetId, item.name)] = item
+    return result
+  }, {})
+  const actionsByTargetId = (actions?.items || []).reduce<Record<string, string[]>>((result, item) => {
+    result[item.targetId] = item.actions.map((action: ActionCatalogResponse['items'][number]['actions'][number]) => action.name)
+    return result
+  }, {})
+  const actionNameOptions = toOptions(
+    (actions?.items || []).flatMap((item) =>
+      item.actions.map((action: ActionCatalogResponse['items'][number]['actions'][number]) => action.name),
+    ),
+  )
+  const actionQueryActionOptions = actionQueryTargetId
+    ? toOptions(actionsByTargetId[actionQueryTargetId] || [])
+    : actionNameOptions
+  const manualActionOptions = manualActionTargetId
+    ? toOptions(actionsByTargetId[manualActionTargetId] || [])
+    : actionNameOptions
+  const selectedManualActionDescriptor =
+    manualActionTargetId && manualActionAction
+      ? actionDescriptorByKey[buildActionKey(manualActionTargetId, manualActionAction)]
+      : undefined
+  const manualActionArgNames = (selectedManualActionDescriptor?.args || []).filter((name) => name !== 'text')
+  const screenOptions: Option[] = toOptions([
+    help?.screenName,
+    snapshot?.screen,
+    snapshot?.summary?.screen,
+    ...(actions?.items || []).map((item: ActionCatalogResponse['items'][number]) => item.screen),
+    ...(logs?.items || []).map((item) => item.data?.screen),
+  ])
 
-export function ActionTab({
-  actionQueryActionOptions,
-  actionQueryForm,
-  actionResult,
-  actionTargetIdOptions,
-  actions,
-  fillManualAction,
-  loadActions,
-  manualActionArgNames,
-  manualActionForm,
-  manualActionOptions,
-  manualActionTargetId,
-  runAction,
-  runManualAction,
-  screenOptions,
-  selectedManualActionDescriptor,
-}: Props) {
   const actionColumns: ColumnsType<ActionCatalogResponse['items'][number]> = [
     {
       title: 'targetId',
