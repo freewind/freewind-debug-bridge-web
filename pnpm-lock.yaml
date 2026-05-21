@@ -18,8 +18,8 @@ importers:
         specifier: ^6.4.3
         version: 6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       freewind-ts-utils:
-        specifier: github:freewind/freewind-ts-utils#v0.2.0
-        version: https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/70a0e79d95408c41bcac741c97db2813a4238724(antd@6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-json-view-lite@2.5.0(react@18.2.0))(react@18.2.0)
+        specifier: github:freewind/freewind-ts-utils#v0.2.1
+        version: https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/6c3fe7dbe3dadc9a1391091d06c905ad5554dbf7(antd@6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-json-view-lite@2.5.0(react@18.2.0))(react@18.2.0)
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -852,9 +852,9 @@ packages:
     resolution: {integrity: sha512-WUj2qlxaQtO4g6Pq5c29GTcWGDyd8itL8zTlipgECz3JesAiiOKotd8JU6otB3PACgG6xkJUyVhboMS+bje/jA==}
     engines: {node: '>=6'}
 
-  freewind-ts-utils@https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/70a0e79d95408c41bcac741c97db2813a4238724:
-    resolution: {tarball: https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/70a0e79d95408c41bcac741c97db2813a4238724}
-    version: 0.2.0
+  freewind-ts-utils@https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/6c3fe7dbe3dadc9a1391091d06c905ad5554dbf7:
+    resolution: {tarball: https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/6c3fe7dbe3dadc9a1391091d06c905ad5554dbf7}
+    version: 0.2.1
     peerDependencies:
       antd: ^6
       react: 18.2.0
@@ -1972,7 +1972,7 @@ snapshots:
 
   escalade@3.2.0: {}
 
-  freewind-ts-utils@https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/70a0e79d95408c41bcac741c97db2813a4238724(antd@6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-json-view-lite@2.5.0(react@18.2.0))(react@18.2.0):
+  freewind-ts-utils@https://codeload.github.com/freewind/freewind-ts-utils/tar.gz/6c3fe7dbe3dadc9a1391091d06c905ad5554dbf7(antd@6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react-json-view-lite@2.5.0(react@18.2.0))(react@18.2.0):
     dependencies:
       antd: 6.4.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react: 18.2.0

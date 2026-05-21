@@ -1,6 +1,6 @@
 import type { FC } from 'react'
 import { Card, Space } from 'antd'
-import { JsonPreviewer } from 'freewind-ts-utils'
+import { JsonPreviewer } from 'freewind-ts-utils/antd'
 import { useAppStore } from '../../store'
 
 export const HelpTab: FC = () => {

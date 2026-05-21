@@ -1,5 +1,5 @@
 import { Button, Card, Flex, Form, Select, Space } from 'antd'
-import { JsonPreviewer } from 'freewind-ts-utils'
+import { JsonPreviewer } from 'freewind-ts-utils/antd'
 import type { FC } from 'react'
 import { LabeledField } from '../../../components'
 import type { ActionCatalogResponse } from '../../../api-spec'

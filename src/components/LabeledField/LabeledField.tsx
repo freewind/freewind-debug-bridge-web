@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { Form } from 'antd'
 import type { FormItemProps } from 'antd'
-import { FloatLabel } from 'freewind-ts-utils'
+import { FloatLabel } from 'freewind-ts-utils/antd'
 
 type Props = {
   children: ReactNode

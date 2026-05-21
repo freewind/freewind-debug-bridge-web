@@ -13,7 +13,7 @@
     "@ant-design/icons": "^6.2.3",
     "ahooks": "^3.9.7",
     "antd": "^6.4.3",
-    "freewind-ts-utils": "github:freewind/freewind-ts-utils#v0.2.0",
+    "freewind-ts-utils": "github:freewind/freewind-ts-utils#v0.2.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-json-view-lite": "^2.5.0",

@@ -1,6 +1,6 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { JsonPreviewer } from 'freewind-ts-utils'
+import { JsonPreviewer } from 'freewind-ts-utils/antd'
 import type { FC } from 'react'
 import type { LogEntry, LogsResponse } from '../../../api-spec'
 import { commonSelectProps } from '../../constants'
