@@ -12,7 +12,7 @@ import type {
   MetaResponse,
   SnapshotResponse,
   StateResponse,
-} from '../api-spec'
+} from '../generated/api-types'
 import { buildQuery, fetchJSON } from '../api'
 import { normalizeAPIBaseURL } from '../utils/normalizeAPIBaseURL'
 import { normalizeSnapshotQuery } from '../utils/normalizeSnapshotQuery'

@@ -2,7 +2,7 @@ import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table } fr
 import type { ColumnsType } from 'antd/es/table'
 import { JsonPreviewer } from 'freewind-ts-utils/antd'
 import type { FC } from 'react'
-import type { LogEntry, LogsResponse } from '../../../api-spec'
+import type { LogEntry, LogsResponse } from '../../../generated/api-types'
 import { commonSelectProps } from '../../constants'
 import { JsonInfoButton, LabeledField } from '../../../components'
 import { toOptions } from '../../../utils/toOptions'

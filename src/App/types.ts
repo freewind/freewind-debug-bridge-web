@@ -1,4 +1,4 @@
-import type { ActionCatalogResponse } from '../api-spec'
+import type { ActionCatalogResponse } from '../generated/api-types'
 
 export type ActionDescriptorView =
   ActionCatalogResponse['items'][number]['actions'][number] & {

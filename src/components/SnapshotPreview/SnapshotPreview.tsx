@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useSize } from 'ahooks'
 import { Typography } from 'antd'
-import type { SnapshotResponse } from '../../api-spec'
+import type { SnapshotResponse } from '../../generated/api-types'
 import { toSnapshotPreviewNodes } from '../../utils/toSnapshotPreviewNodes'
 
 const snapshotPreviewFallbackWidth = 520

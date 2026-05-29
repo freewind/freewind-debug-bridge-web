@@ -1,4 +1,8 @@
-import type { SnapshotPreviewNode, SnapshotResponse } from '../api-spec'
+import type { SnapshotNode, SnapshotResponse } from '../generated/api-types'
+
+export type SnapshotPreviewNode = SnapshotNode & {
+  bounds: NonNullable<SnapshotNode['bounds']>
+}
 
 export function toSnapshotPreviewNodes(snapshot: SnapshotResponse | null): SnapshotPreviewNode[] {
   return (snapshot?.nodes || [])

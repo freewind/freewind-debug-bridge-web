@@ -1,0 +1,719 @@
+openapi: 3.0.0
+info:
+  title: Freewind Debug Bridge
+  version: 0.0.0
+tags: []
+paths:
+  /action:
+    get:
+      operationId: ActionRoutes_listActions
+      parameters:
+        - name: targetId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: action
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: screen
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionCatalogResponse'
+    post:
+      operationId: ActionRoutes_runAction
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionSuccessResponse'
+        '400':
+          description: The server could not understand the request due to invalid syntax.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionErrorResponse'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionErrorResponse'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionRequest'
+  /help:
+    get:
+      operationId: HelpRoutes_help
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HelpResponse'
+  /logs:
+    get:
+      operationId: LogsRoutes_listLogs
+      parameters:
+        - name: event
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: level
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: targetId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: screen
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: keyword
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogsResponse'
+    delete:
+      operationId: LogsRoutes_clearLogs
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogsClearResponse'
+  /meta:
+    get:
+      operationId: MetaRoutes_meta
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetaResponse'
+  /snapshot:
+    get:
+      operationId: SnapshotRoutes_getSnapshot
+      parameters:
+        - name: targetId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: scope
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SnapshotScope'
+          explode: false
+        - name: depth
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: types
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: textKeyword
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: visible
+          in: query
+          required: false
+          schema:
+            type: boolean
+          explode: false
+        - name: enabled
+          in: query
+          required: false
+          schema:
+            type: boolean
+          explode: false
+        - name: clickable
+          in: query
+          required: false
+          schema:
+            type: boolean
+          explode: false
+        - name: fields
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SnapshotResponse'
+  /state:
+    get:
+      operationId: StateRoutes_getState
+      parameters:
+        - name: keys
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: targetId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: scope
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/StateScope'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StateResponse'
+components:
+  schemas:
+    ActionCatalogItem:
+      type: object
+      required:
+        - targetId
+        - targetType
+        - screen
+        - actions
+      properties:
+        targetId:
+          type: string
+        targetType:
+          type: string
+        screen:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCatalogItemAction'
+    ActionCatalogItemAction:
+      type: object
+      required:
+        - name
+        - args
+        - summary
+        - example
+      properties:
+        name:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        example:
+          $ref: '#/components/schemas/ActionRequest'
+    ActionCatalogResponse:
+      type: object
+      required:
+        - summary
+        - items
+      properties:
+        summary:
+          $ref: '#/components/schemas/ActionCatalogSummary'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionCatalogItem'
+    ActionCatalogSummary:
+      type: object
+      required:
+        - targetCount
+        - actionCount
+      properties:
+        targetCount:
+          type: integer
+          format: int32
+        actionCount:
+          type: integer
+          format: int32
+    ActionErrorResponse:
+      type: object
+      required:
+        - accepted
+        - message
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - false
+        message:
+          type: string
+        errorType:
+          type: string
+        timedOut:
+          type: boolean
+        durationMs:
+          type: integer
+          format: int32
+    ActionRequest:
+      type: object
+      required:
+        - action
+        - targetId
+      properties:
+        action:
+          type: string
+        targetId:
+          type: string
+        text:
+          type: string
+        dx:
+          type: integer
+          format: int32
+        dy:
+          type: integer
+          format: int32
+        args:
+          type: object
+          additionalProperties:
+            type: string
+        source:
+          type: string
+    ActionResponse:
+      anyOf:
+        - $ref: '#/components/schemas/ActionSuccessResponse'
+        - $ref: '#/components/schemas/ActionErrorResponse'
+    ActionSuccessResponse:
+      type: object
+      required:
+        - accepted
+        - message
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - true
+        message:
+          type: string
+        action:
+          type: string
+        targetId:
+          type: string
+        durationMs:
+          type: integer
+          format: int32
+    HelpCounts:
+      type: object
+      required:
+        - actionTargetCount
+        - logCount
+        - stateKeyCount
+        - snapshotNodeCount
+      properties:
+        actionTargetCount:
+          type: integer
+          format: int32
+        logCount:
+          type: integer
+          format: int32
+        stateKeyCount:
+          type: integer
+          format: int32
+        snapshotNodeCount:
+          type: integer
+          format: int32
+    HelpEndpoint:
+      type: object
+      required:
+        - method
+        - path
+        - summary
+      properties:
+        method:
+          type: string
+        path:
+          type: string
+        summary:
+          type: string
+        queryFields:
+          type: array
+          items:
+            type: string
+        bodyFields:
+          type: array
+          items:
+            type: string
+    HelpResponse:
+      type: object
+      required:
+        - appName
+        - screenName
+        - serverTime
+        - capabilities
+        - counts
+        - endpoints
+        - examples
+      properties:
+        appName:
+          type: string
+        consoleTitle:
+          type: string
+        screenName:
+          type: string
+        serverTime:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        counts:
+          $ref: '#/components/schemas/HelpCounts'
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/HelpEndpoint'
+        examples:
+          type: array
+          items:
+            type: string
+    LogEntry:
+      type: object
+      required:
+        - seq
+        - time
+        - source
+        - level
+        - event
+        - summary
+        - data
+      properties:
+        seq:
+          type: integer
+          format: int32
+        time:
+          type: string
+        source:
+          type: string
+        level:
+          type: string
+        event:
+          type: string
+        targetId:
+          type: string
+        summary:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+    LogsClearResponse:
+      type: object
+      required:
+        - accepted
+        - message
+        - clearedCount
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - true
+        message:
+          type: string
+        clearedCount:
+          type: integer
+          format: int32
+    LogsResponse:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/LogsSummary'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogEntry'
+        nextAfterSeq:
+          type: integer
+          format: int32
+    LogsSummary:
+      type: object
+      required:
+        - total
+        - levelCounts
+        - sourceCounts
+        - eventCountsTop
+      properties:
+        total:
+          type: integer
+          format: int32
+        timeRange:
+          $ref: '#/components/schemas/LogsTimeRange'
+        levelCounts:
+          type: object
+          additionalProperties:
+            type: string
+        sourceCounts:
+          type: object
+          additionalProperties:
+            type: string
+        eventCountsTop:
+          type: object
+          additionalProperties:
+            type: string
+    LogsTimeRange:
+      type: object
+      required:
+        - from
+        - to
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+    MetaResponse:
+      type: object
+      required:
+        - appName
+        - buildVersion
+      properties:
+        appName:
+          type: string
+        buildVersion:
+          type: integer
+          format: int32
+    SnapshotBounds:
+      type: object
+      required:
+        - left
+        - top
+        - width
+        - height
+      properties:
+        left:
+          type: number
+          format: double
+        top:
+          type: number
+          format: double
+        width:
+          type: number
+          format: double
+        height:
+          type: number
+          format: double
+    SnapshotNode:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+        parentId:
+          type: string
+        type:
+          type: string
+        text:
+          type: string
+        role:
+          type: string
+        backgroundColor:
+          type: string
+        contentColor:
+          type: string
+        visible:
+          type: boolean
+        enabled:
+          type: boolean
+        clickable:
+          type: boolean
+        value:
+          type: string
+        extra:
+          type: object
+          additionalProperties:
+            type: string
+        bounds:
+          $ref: '#/components/schemas/SnapshotBounds'
+    SnapshotResponse:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/SnapshotSummary'
+        fieldCatalog:
+          type: array
+          items:
+            type: string
+        examples:
+          type: array
+          items:
+            type: string
+        screen:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: '#/components/schemas/SnapshotNode'
+    SnapshotScope:
+      type: string
+      enum:
+        - self
+        - branchToRoot
+        - subtree
+    SnapshotSummary:
+      type: object
+      required:
+        - screen
+        - nodeCount
+        - rootIds
+        - typeCounts
+        - clickableCount
+      properties:
+        screen:
+          type: string
+        nodeCount:
+          type: integer
+          format: int32
+        rootIds:
+          type: array
+          items:
+            type: string
+        typeCounts:
+          type: object
+          additionalProperties:
+            type: string
+        clickableCount:
+          type: integer
+          format: int32
+    StateKeySample:
+      type: object
+      required:
+        - key
+        - sample
+      properties:
+        key:
+          type: string
+        sample:
+          type: string
+    StateResponse:
+      type: object
+      properties:
+        summary:
+          $ref: '#/components/schemas/StateSummary'
+        appState:
+          type: object
+          additionalProperties:
+            type: string
+        targetState:
+          type: object
+          additionalProperties:
+            type: string
+    StateScope:
+      type: string
+      enum:
+        - app
+        - target
+        - branch
+    StateSummary:
+      type: object
+      required:
+        - appStateKeys
+        - targetStateTargets
+      properties:
+        appStateKeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/StateKeySample'
+        targetStateTargets:
+          type: array
+          items:
+            type: string
+servers:
+  - url: http://localhost
+    description: Debug bridge server
+    variables: {}
