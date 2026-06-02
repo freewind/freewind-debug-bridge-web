@@ -1,6 +1,6 @@
 import { Space, Tag, Tree, Typography } from 'antd'
 import type { DataNode } from 'antd/es/tree'
-import type { SnapshotResponse } from '../../generated/api-types'
+import type { SnapshotResponse } from '../../api-contract'
 import { buildSnapshotTree } from '../../utils/buildSnapshotTree'
 
 type Props = {

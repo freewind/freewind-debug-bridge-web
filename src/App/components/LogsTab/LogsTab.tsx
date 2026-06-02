@@ -2,7 +2,7 @@ import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table } fr
 import type { ColumnsType } from 'antd/es/table'
 import { JsonPreviewer } from 'freewind-ts-utils/antd'
 import type { FC } from 'react'
-import type { LogEntry, LogsResponse } from '../../../generated/api-types'
+import type { LogEntry } from '../../../api-contract'
 import { commonSelectProps } from '../../constants'
 import { JsonInfoButton, LabeledField } from '../../../components'
 import { toOptions } from '../../../utils/toOptions'
@@ -43,7 +43,7 @@ export const LogsTab: FC = () => {
     help?.screenName,
     snapshot?.screen,
     snapshot?.summary?.screen,
-    ...(actions?.items || []).map((item: LogsResponse extends never ? never : { screen: string }) => item.screen),
+    ...(actions?.items || []).map((item) => item.screen),
     ...(logs?.items || []).map((item: LogEntry) => item.data?.screen),
   ])
   const logEventOptions = toOptions([

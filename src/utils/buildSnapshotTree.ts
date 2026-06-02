@@ -1,4 +1,4 @@
-import type { SnapshotResponse } from '../generated/api-types'
+import type { SnapshotResponse } from '../api-contract'
 
 type SnapshotTreeNode = {
   children: SnapshotTreeNode[]

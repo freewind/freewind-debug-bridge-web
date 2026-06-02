@@ -1,7 +1,7 @@
 import { App as AntdApp, Form } from 'antd'
 import { type FC, type PropsWithChildren, useCallback, useMemo } from 'react'
 import { createContext, useContextSelector } from 'use-context-selector'
-import type { ActionRequest } from '../generated/api-types'
+import type { ActionRequest } from '../api-contract'
 import { useDebugBridgeRequests } from '../hooks'
 import { buildActionKey } from '../utils/buildActionKey'
 import type { ManualActionFormValues } from './types'

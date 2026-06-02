@@ -12,8 +12,17 @@ import type {
   MetaResponse,
   SnapshotResponse,
   StateResponse,
-} from '../generated/api-types'
-import { buildQuery, fetchJSON } from '../api'
+} from '../api-contract'
+import {
+  clearLogs as clearRemoteLogs,
+  getActionCatalog,
+  getHelp,
+  getLogs,
+  getMeta,
+  getSnapshot,
+  getState,
+  runAction as postAction,
+} from '../client-api'
 import { normalizeAPIBaseURL } from '../utils/normalizeAPIBaseURL'
 import { normalizeSnapshotQuery } from '../utils/normalizeSnapshotQuery'
 import { readInitialAPIBaseURL } from '../utils/readInitialAPIBaseURL'
@@ -64,22 +73,15 @@ export function useDebugBridgeRequests({
     setActionResult(null)
   }
 
-  async function requestJSON<T>(nextBaseURL: string | undefined, path: string, init?: RequestInit) {
-    return fetchJSON<T>(path, {
-      ...init,
-      baseURL: resolveBaseURL(nextBaseURL),
-    })
-  }
-
   const metaRequest = useRequest(
-    async (nextBaseURL?: string) => requestJSON<MetaResponse>(nextBaseURL, '/meta'),
+    async (nextBaseURL?: string) => getMeta(resolveBaseURL(nextBaseURL)),
     {
       manual: true,
       onSuccess: setMeta,
     },
   )
   const helpRequest = useRequest(
-    async (nextBaseURL?: string) => requestJSON<HelpResponse>(nextBaseURL, '/help'),
+    async (nextBaseURL?: string) => getHelp(resolveBaseURL(nextBaseURL)),
     {
       manual: true,
       onSuccess: setHelp,
@@ -88,7 +90,7 @@ export function useDebugBridgeRequests({
   const actionsRequest = useRequest(
     async (nextBaseURL?: string, values?: Record<string, unknown>) => {
       const formValues = values ?? actionQueryForm.getFieldsValue()
-      return requestJSON<ActionCatalogResponse>(nextBaseURL, `/action${buildQuery(formValues)}`)
+      return getActionCatalog(resolveBaseURL(nextBaseURL), formValues)
     },
     {
       manual: true,
@@ -98,7 +100,7 @@ export function useDebugBridgeRequests({
   const logsRequest = useRequest(
     async (nextBaseURL?: string, values?: Record<string, unknown>) => {
       const formValues = values ?? logsForm.getFieldsValue()
-      return requestJSON<LogsResponse>(nextBaseURL, `/logs${buildQuery(formValues)}`)
+      return getLogs(resolveBaseURL(nextBaseURL), formValues)
     },
     {
       manual: true,
@@ -108,7 +110,7 @@ export function useDebugBridgeRequests({
   const stateRequest = useRequest(
     async (nextBaseURL?: string, values?: Record<string, unknown>) => {
       const formValues = values ?? stateForm.getFieldsValue()
-      return requestJSON<StateResponse>(nextBaseURL, `/state${buildQuery(formValues)}`)
+      return getState(resolveBaseURL(nextBaseURL), formValues)
     },
     {
       manual: true,
@@ -118,7 +120,7 @@ export function useDebugBridgeRequests({
   const snapshotRequest = useRequest(
     async (nextBaseURL?: string, values?: Record<string, unknown>) => {
       const formValues = normalizeSnapshotQuery(values ?? snapshotForm.getFieldsValue())
-      return requestJSON<SnapshotResponse>(nextBaseURL, `/snapshot${buildQuery(formValues)}`)
+      return getSnapshot(resolveBaseURL(nextBaseURL), formValues)
     },
     {
       manual: true,
@@ -126,7 +128,7 @@ export function useDebugBridgeRequests({
     },
   )
   const snapshotSummaryRequest = useRequest(
-    async (nextBaseURL?: string) => requestJSON<SnapshotResponse>(nextBaseURL, '/snapshot'),
+    async (nextBaseURL?: string) => getSnapshot(resolveBaseURL(nextBaseURL)),
     {
       manual: true,
       onSuccess: setSnapshot,
@@ -134,11 +136,7 @@ export function useDebugBridgeRequests({
   )
   const actionRequest = useRequest(
     async (payload: ActionRequest, nextBaseURL?: string) =>
-      requestJSON<ActionResponse>(nextBaseURL, '/action', {
-        body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-      }),
+      postAction(resolveBaseURL(nextBaseURL), payload),
     {
       manual: true,
       onSuccess: (result) => {
@@ -147,10 +145,7 @@ export function useDebugBridgeRequests({
     },
   )
   const clearLogsRequest = useRequest(
-    async (nextBaseURL?: string) =>
-      requestJSON<LogsClearResponse>(nextBaseURL, '/logs', {
-        method: 'DELETE',
-      }),
+    async (nextBaseURL?: string) => clearRemoteLogs(resolveBaseURL(nextBaseURL)),
     {
       manual: true,
       onSuccess: (result) => {

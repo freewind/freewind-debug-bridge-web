@@ -1,7 +1,7 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space } from 'antd'
 import type { FC } from 'react'
 import { JsonInfoButton, LabeledField, SnapshotPreview, SnapshotTreeView } from '../../../components'
-import type { ActionCatalogResponse, SnapshotNode } from '../../../generated/api-types'
+import type { ActionCatalogResponse, SnapshotNode } from '../../../api-contract'
 import { toOptions } from '../../../utils/toOptions'
 import { snapshotScopeOptions, triStateOptions } from '../../constants'
 import { commonSelectProps } from '../../constants'

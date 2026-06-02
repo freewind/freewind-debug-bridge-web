@@ -1,0 +1,668 @@
+openapi: 3.0.2
+paths:
+  /meta:
+    get:
+      summary: Return app identity and build version
+      tags: []
+      parameters: []
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetaResponse"
+  /help:
+    get:
+      summary: Return dynamic full help
+      tags: []
+      parameters: []
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelpResponse"
+  /action:
+    get:
+      summary: List executable targets and actions
+      tags: []
+      parameters:
+        - name: targetId
+          in: query
+          schema:
+            type: string
+        - name: action
+          in: query
+          schema:
+            type: string
+        - name: screen
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionCatalogResponse"
+    post:
+      summary: Run one concrete action
+      tags: []
+      parameters: []
+      requestBody:
+        description: Body
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActionRequest"
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionSuccessResponse"
+        "400":
+          description: "400"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionErrorResponse"
+        "500":
+          description: "500"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionErrorResponse"
+  /logs:
+    get:
+      summary: Query logs
+      tags: []
+      parameters:
+        - name: event
+          in: query
+          schema:
+            type: string
+        - name: level
+          in: query
+          schema:
+            type: string
+        - name: source
+          in: query
+          schema:
+            type: string
+        - name: targetId
+          in: query
+          schema:
+            type: string
+        - name: screen
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          schema:
+            type: string
+        - name: to
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogsResponse"
+    delete:
+      summary: Delete all logs
+      tags: []
+      parameters: []
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LogsClearResponse"
+  /state:
+    get:
+      summary: Query state
+      tags: []
+      parameters:
+        - name: keys
+          in: query
+          schema:
+            type: string
+        - name: targetId
+          in: query
+          schema:
+            type: string
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum:
+              - app
+              - target
+              - branch
+            title: StateScope
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StateResponse"
+  /snapshot:
+    get:
+      summary: Query snapshot tree
+      tags: []
+      parameters:
+        - name: targetId
+          in: query
+          schema:
+            type: string
+        - name: scope
+          in: query
+          schema:
+            type: string
+            enum:
+              - self
+              - branchToRoot
+              - subtree
+            title: SnapshotScope
+        - name: depth
+          in: query
+          schema:
+            type: integer
+        - name: types
+          in: query
+          schema:
+            type: string
+        - name: textKeyword
+          in: query
+          schema:
+            type: string
+        - name: visible
+          in: query
+          schema:
+            type: boolean
+        - name: enabled
+          in: query
+          schema:
+            type: boolean
+        - name: clickable
+          in: query
+          schema:
+            type: boolean
+        - name: fields
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: "200"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SnapshotResponse"
+info:
+  title: Freewind Debug Bridge
+  version: 0.0.1
+servers:
+  - url: http://localhost
+    description: Debug bridge server
+components:
+  schemas:
+    MetaResponse:
+      type: object
+      properties:
+        appName:
+          type: string
+        buildVersion:
+          type: integer
+      required:
+        - appName
+        - buildVersion
+      title: MetaResponse
+    HelpCounts:
+      type: object
+      properties:
+        actionTargetCount:
+          type: integer
+        logCount:
+          type: integer
+        stateKeyCount:
+          type: integer
+        snapshotNodeCount:
+          type: integer
+      required:
+        - actionTargetCount
+        - logCount
+        - stateKeyCount
+        - snapshotNodeCount
+      title: HelpCounts
+    HelpEndpoint:
+      type: object
+      properties:
+        method:
+          type: string
+        path:
+          type: string
+        summary:
+          type: string
+        queryFields:
+          type: array
+          items:
+            type: string
+        bodyFields:
+          type: array
+          items:
+            type: string
+      required:
+        - method
+        - path
+        - summary
+      title: HelpEndpoint
+    HelpResponse:
+      type: object
+      properties:
+        appName:
+          type: string
+        consoleTitle:
+          type: string
+        screenName:
+          type: string
+        serverTime:
+          type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        counts:
+          $ref: "#/components/schemas/HelpCounts"
+        endpoints:
+          type: array
+          items:
+            $ref: "#/components/schemas/HelpEndpoint"
+        examples:
+          type: array
+          items:
+            type: string
+      required:
+        - appName
+        - screenName
+        - serverTime
+        - capabilities
+        - counts
+        - endpoints
+        - examples
+      title: HelpResponse
+    ActionCatalogSummary:
+      type: object
+      properties:
+        targetCount:
+          type: integer
+        actionCount:
+          type: integer
+      required:
+        - targetCount
+        - actionCount
+      title: ActionCatalogSummary
+    ActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+        targetId:
+          type: string
+        text:
+          type: string
+        dx:
+          type: integer
+        dy:
+          type: integer
+        args:
+          type: object
+          additionalProperties:
+            type: string
+        source:
+          type: string
+      required:
+        - action
+        - targetId
+      title: ActionRequest
+    ActionCatalogItemAction:
+      type: object
+      properties:
+        name:
+          type: string
+        args:
+          type: array
+          items:
+            type: string
+        summary:
+          type: string
+        example:
+          $ref: "#/components/schemas/ActionRequest"
+      required:
+        - name
+        - args
+        - summary
+        - example
+      title: ActionCatalogItemAction
+    ActionCatalogItem:
+      type: object
+      properties:
+        targetId:
+          type: string
+        targetType:
+          type: string
+        screen:
+          type: string
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActionCatalogItemAction"
+      required:
+        - targetId
+        - targetType
+        - screen
+        - actions
+      title: ActionCatalogItem
+    ActionCatalogResponse:
+      type: object
+      properties:
+        summary:
+          $ref: "#/components/schemas/ActionCatalogSummary"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ActionCatalogItem"
+      required:
+        - summary
+        - items
+      title: ActionCatalogResponse
+    ActionSuccessResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - true
+        message:
+          type: string
+        action:
+          type: string
+        targetId:
+          type: string
+        durationMs:
+          type: integer
+      required:
+        - accepted
+        - message
+      title: ActionSuccessResponse
+    ActionErrorResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - false
+        message:
+          type: string
+        errorType:
+          type: string
+        timedOut:
+          type: boolean
+        durationMs:
+          type: integer
+      required:
+        - accepted
+        - message
+      title: ActionErrorResponse
+    LogsTimeRange:
+      type: object
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+      required:
+        - from
+        - to
+      title: LogsTimeRange
+    LogsSummary:
+      type: object
+      properties:
+        total:
+          type: integer
+        timeRange:
+          $ref: "#/components/schemas/LogsTimeRange"
+        levelCounts:
+          type: object
+          additionalProperties:
+            type: string
+        sourceCounts:
+          type: object
+          additionalProperties:
+            type: string
+        eventCountsTop:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - total
+        - levelCounts
+        - sourceCounts
+        - eventCountsTop
+      title: LogsSummary
+    LogEntry:
+      type: object
+      properties:
+        seq:
+          type: integer
+        time:
+          type: string
+        source:
+          type: string
+        level:
+          type: string
+        event:
+          type: string
+        targetId:
+          type: string
+        summary:
+          type: string
+        data:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - seq
+        - time
+        - source
+        - level
+        - event
+        - summary
+        - data
+      title: LogEntry
+    LogsResponse:
+      type: object
+      properties:
+        summary:
+          $ref: "#/components/schemas/LogsSummary"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/LogEntry"
+        nextAfterSeq:
+          type: integer
+      title: LogsResponse
+    LogsClearResponse:
+      type: object
+      properties:
+        accepted:
+          type: boolean
+          enum:
+            - true
+        message:
+          type: string
+        clearedCount:
+          type: integer
+      required:
+        - accepted
+        - message
+        - clearedCount
+      title: LogsClearResponse
+    StateKeySample:
+      type: object
+      properties:
+        key:
+          type: string
+        sample:
+          type: string
+      required:
+        - key
+        - sample
+      title: StateKeySample
+    StateSummary:
+      type: object
+      properties:
+        appStateKeys:
+          type: array
+          items:
+            $ref: "#/components/schemas/StateKeySample"
+        targetStateTargets:
+          type: array
+          items:
+            type: string
+      required:
+        - appStateKeys
+        - targetStateTargets
+      title: StateSummary
+    StateResponse:
+      type: object
+      properties:
+        summary:
+          $ref: "#/components/schemas/StateSummary"
+        appState:
+          type: object
+          additionalProperties:
+            type: string
+        targetState:
+          type: object
+          additionalProperties:
+            type: string
+      title: StateResponse
+    SnapshotSummary:
+      type: object
+      properties:
+        screen:
+          type: string
+        nodeCount:
+          type: integer
+        rootIds:
+          type: array
+          items:
+            type: string
+        typeCounts:
+          type: object
+          additionalProperties:
+            type: string
+        clickableCount:
+          type: integer
+      required:
+        - screen
+        - nodeCount
+        - rootIds
+        - typeCounts
+        - clickableCount
+      title: SnapshotSummary
+    SnapshotBounds:
+      type: object
+      properties:
+        left:
+          type: number
+        top:
+          type: number
+        width:
+          type: number
+        height:
+          type: number
+      required:
+        - left
+        - top
+        - width
+        - height
+      title: SnapshotBounds
+    SnapshotNode:
+      type: object
+      properties:
+        id:
+          type: string
+        parentId:
+          type: string
+        type:
+          type: string
+        text:
+          type: string
+        role:
+          type: string
+        backgroundColor:
+          type: string
+        contentColor:
+          type: string
+        visible:
+          type: boolean
+        enabled:
+          type: boolean
+        clickable:
+          type: boolean
+        value:
+          type: string
+        extra:
+          type: object
+          additionalProperties:
+            type: string
+        bounds:
+          $ref: "#/components/schemas/SnapshotBounds"
+      required:
+        - id
+      title: SnapshotNode
+    SnapshotResponse:
+      type: object
+      properties:
+        summary:
+          $ref: "#/components/schemas/SnapshotSummary"
+        fieldCatalog:
+          type: array
+          items:
+            type: string
+        examples:
+          type: array
+          items:
+            type: string
+        screen:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SnapshotNode"
+      title: SnapshotResponse

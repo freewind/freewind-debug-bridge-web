@@ -1,4 +1,4 @@
-import type { SnapshotNode, SnapshotResponse } from '../generated/api-types'
+import type { SnapshotNode, SnapshotResponse } from '../api-contract'
 
 export type SnapshotPreviewNode = SnapshotNode & {
   bounds: NonNullable<SnapshotNode['bounds']>
