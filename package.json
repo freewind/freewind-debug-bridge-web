@@ -17,7 +17,7 @@
     "@ts-rest/core": "^3.52.1",
     "ahooks": "^3.9.7",
     "antd": "^6.4.3",
-    "freewind-ts-utils": "github:freewind/freewind-ts-utils#v0.2.1",
+    "freewind-code-utils": "link:/Users/peng.li/workspace/freewind-code-utils/typescript",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-json-view-lite": "^2.5.0",

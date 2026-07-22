@@ -1,6 +1,6 @@
 import { Button, Card, Flex, Form, Input, InputNumber, Select, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
-import { JsonPreviewer } from 'freewind-ts-utils/antd'
+import { JsonPreviewer } from 'freewind-code-utils/src/antd'
 import type { FC } from 'react'
 import { JsonInfoButton, LabeledField } from '../../../components'
 import type { ActionCatalogResponse } from '../../../api-contract'

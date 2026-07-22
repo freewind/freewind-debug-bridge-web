@@ -1,6 +1,6 @@
 import { InfoCircleOutlined } from '@ant-design/icons'
 import { Button, Popover } from 'antd'
-import { JsonPreviewer } from 'freewind-ts-utils/antd'
+import { JsonPreviewer } from 'freewind-code-utils/src/antd'
 
 type Props = {
   title: string
